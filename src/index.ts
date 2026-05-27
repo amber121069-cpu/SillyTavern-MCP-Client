@@ -221,16 +221,27 @@ async function handleUIChanges(): Promise<void> {
           tools.forEach((tool: McpTool) => {
             const toolItem = document.createElement('div');
             toolItem.className = 'tool-item';
-            toolItem.innerHTML = `
-              <div class="tool-header">
-                <span class="tool-name">${tool.name}</span>
-                <label class="checkbox_label">
-                  <input type="checkbox" class="tool-toggle" ${tool._enabled ? 'checked' : ''} />
-                  <span>Enable</span>
-                </label>
-              </div>
-              <div class="tool-description">${tool.description || 'No description available'}</div>
-            `;
+            // [pin] XSS fix: build DOM with textContent to escape MCP-server-supplied tool.name/description
+            // (bmen MCP audit 2026-05-27 §4.C)
+            const header = document.createElement('div');
+            header.className = 'tool-header';
+            const nameSpan = document.createElement('span');
+            nameSpan.className = 'tool-name';
+            nameSpan.textContent = tool.name;
+            const label = document.createElement('label');
+            label.className = 'checkbox_label';
+            const cb = document.createElement('input');
+            cb.type = 'checkbox';
+            cb.className = 'tool-toggle';
+            cb.checked = !!tool._enabled;
+            const cbSpan = document.createElement('span');
+            cbSpan.textContent = 'Enable';
+            label.append(cb, cbSpan);
+            header.append(nameSpan, label);
+            const desc = document.createElement('div');
+            desc.className = 'tool-description';
+            desc.textContent = tool.description || 'No description available';
+            toolItem.append(header, desc);
 
             const toolToggle = toolItem.querySelector('.tool-toggle') as HTMLInputElement & { dataset: DOMStringMap };
             toolToggle.dataset.server = server.name;
