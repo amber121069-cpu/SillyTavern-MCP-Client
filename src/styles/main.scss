@@ -247,14 +247,21 @@
 /* fix,對齊 ST mobile-styles.css:2 慣用 breakpoint max-width:1000px)            */
 /*                                                                              */
 /* 修法精神:.mcp-tools-content top-level 已補 width:100% + box-sizing:border-   */
-/* box(讓容器收縮到視窗寬、不溢出);窄屏下 header 與 header-buttons 三顆按鈕   */
-/* (Add Server / Settings / Refresh)橫排 min-content 撐破容器,改用 flex-wrap  */
-/* 讓 h3 與按鈕組、按鈕之間自然換行。                                            */
+/* box(讓容器收縮到視窗寬、不溢出,5b22693 已驗證有效);窄屏下 header 仍溢出   */
+/* 的真因是 .header-buttons 作為 .mcp-tools-header 的 flex item,min-width:auto */
+/* 撐到三顆按鈕(Add Server / Settings / Refresh)min-content 寬、不收縮 ——     */
+/* flex-wrap 對 row 方向的 flex container **不會把單一過寬 flex item 換行**,只 */
+/* 會把多個 item 換行。所以 5b22693 對 .mcp-tools-header 加 flex-wrap:wrap 無效。*/
+/*                                                                              */
+/* 本版修法:.mcp-tools-header 改 flex-direction:column + align-items:stretch, */
+/* 讓 h3 與 .header-buttons 上下堆疊,.header-buttons 寬度被 stretch 限制成容器 */
+/* 寬;此時 .header-buttons 內的 flex-wrap:wrap 才能讓三顆按鈕在容器內換行。    */
 /* ============================================================================ */
 @media screen and (max-width: 1000px) {
     .mcp-tools-content {
         .mcp-tools-header {
-            flex-wrap: wrap;
+            flex-direction: column;
+            align-items: stretch;
             gap: calc(var(--mainFontSize) * 0.5);
 
             .header-buttons {
